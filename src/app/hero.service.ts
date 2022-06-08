@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
+import { catchError, retry } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 
 import { Hero } from './hero';
-import { HEROES } from './mock-heroes';
 import { MessageService } from './message.service';
 
 @Injectable({
@@ -10,10 +11,10 @@ import { MessageService } from './message.service';
 })
 export class HeroService {
 
-  constructor(private messageService: MessageService) { }
+  constructor(private messageService: MessageService, private http: HttpClient) { }
 
   getHeroes(): Observable<Hero[]> {
-    const heroes = of(HEROES);
+    const heroes = this.http.get<Hero[]>('http://localhost:3000/heroes');
     this.messageService.add('HeroService: fetched heroes');
     return heroes;
   }
@@ -21,8 +22,8 @@ export class HeroService {
   getHero(id: number): Observable<Hero> {
     // For now, assume that a hero with the specified `id` always exists.
     // Error handling will be added in the next step of the tutorial.
-    const hero = HEROES.find(h => h.id === id)!;
+    const hero = this.http.get<Hero>(`http://localhost:3000/heroes/${id}`);
     this.messageService.add(`HeroService: fetched hero id=${id}`);
-    return of(hero);
+    return hero;
   }
 }
